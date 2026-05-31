@@ -1,0 +1,22 @@
+# Node.js
+**/node_modules/
+**/dist/
+.env
+.eslintcache
+
+# Python
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+.venv/
+env/
+venv/
+ENV/
+
+# Databases
+backend/database.db
+
+# OS
+.DS_Store
+Thumbs.db

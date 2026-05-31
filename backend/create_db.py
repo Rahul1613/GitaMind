@@ -1,0 +1,44 @@
+import json
+from langchain_community.vectorstores import Chroma
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain.schema import Document
+
+# Load Bhagavad Gita data
+with open("../data/Bhagavad-Gita-JSON-data-main/translation.json", "r", encoding="utf-8-sig") as f:
+    gita_data = json.load(f)
+
+documents = []
+
+for verse in gita_data:
+
+    text = f"""
+    Chapter: {verse.get('chapter_number')}
+    Verse: {verse.get('verse_number')}
+
+    Translation:
+    {verse.get('description')}
+    """
+
+    documents.append(
+        Document(
+            page_content=text,
+            metadata={
+                "chapter": verse.get("chapter_number"),
+                "verse": verse.get("verse_number")
+            }
+        )
+    )
+
+embedding = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
+)
+
+db = Chroma.from_documents(
+    documents,
+    embedding,
+    persist_directory="../embeddings/gita_db"
+)
+
+db.persist()
+
+print("Bhagavad Gita vector database created successfully!")

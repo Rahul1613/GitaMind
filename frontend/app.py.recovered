@@ -1,0 +1,96 @@
+import streamlit as st
+from langchain_community.vectorstores import Chroma
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.llms import Ollama
+
+# -----------------------------
+# PAGE CONFIG
+# -----------------------------
+st.set_page_config(
+    page_title="GitaMind | Timeless Wisdom",
+    page_icon="🕉",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
+
+# -----------------------------
+# ULTRA-PREMIUM ZEN CSS
+# -----------------------------
+st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&family=Lora:ital,wght@0,400;0,700;1,400&display=swap');
+
+    /* Hide Streamlit Defaults */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    .stDeployButton {display:none;}
+
+    /* Root Variables */
+    :root {
+        --primary: #CC8E35;
+        --accent: #FF9800;
+        --bg-gradient: linear-gradient(180deg, #FDFCFB 0%, #E2D1C3 100%);
+        --glass: rgba(255, 255, 255, 0.8);
+        --text-dark: #2D2424;
+    }
+
+    /* Global Body */
+    .stApp {
+        background: var(--bg-gradient);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    /* Main Container Padding */
+    .main .block-container {
+        padding-top: 2rem;
+        max-width: 900px;
+    }
+
+    /* Glass Effect Container */
+    .glass-card {
+<truncated 5042 bytes>
+s = db.similarity_search(question, k=5)
+                context = ""
+                for doc in docs:
+                    context += doc.page_content + "\n\n"
+
+                prompt = f"""
+You are NOT a normal AI assistant.
+You are a spiritual guide that answers ONLY using Bhagavad Gita philosophy and teachings of Lord Krishna.
+
+STRICT RULES:
+- Do NOT give modern psychological advice.
+- Do NOT give generic motivational advice.
+- Answer ONLY according to Bhagavad Gita wisdom.
+- Explain in simple language.
+- Reply in the SAME LANGUAGE as the user's question.
+- Mention chapter and verse references whenever possible.
+- Keep answers spiritual, calm, wise and practical.
+
+Teachings:
+{context}
+
+Question: {question}
+Answer:
+"""
+                response = llm.invoke(prompt)
+
+                # -----------------------------
+                # SHOW RESPONSE
+                # -----------------------------
+                st.markdown('<hr style="margin: 40px 0; border-top: 1px solid rgba(204, 142, 53, 0.2);">', unsafe_allow_html=True)
+                st.markdown("### 🪷 The Sage Speaks")
+                st.markdown(f'<div class="ai-response">{response}</div>', unsafe_allow_html=True)
+
+                st.markdown("<br>", unsafe_allow_html=True)
+
+                # -----------------------------
+                # SHOW RELEVANT VERSES
+                # -----------------------------
+                with st.expander("Explore the Sacred References"):
+                    for doc in docs:
+                        st.markdown(f'<div class="verse-item">{doc.page_content}</div>', unsafe_allow_html=True)
+
+            except Exception as e:
+                st.error(f"A spiritual mist has clouded the connection. Please try again. (Error: {e})")
