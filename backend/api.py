@@ -1,6 +1,9 @@
 import sys
 import os
 
+# Add current directory to path so db_manager can be found when run from repo root
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 # SQLite override for Render compatibility (deb/ubuntu systems might have old sqlite)
 try:
     import sqlite3
