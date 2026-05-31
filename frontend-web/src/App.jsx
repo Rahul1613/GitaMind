@@ -3,7 +3,7 @@ import Auth from './Auth';
 import Sidebar from './components/Sidebar';
 import ChatInput from './components/ChatInput';
 import MessageBubble from './components/MessageBubble';
-import { getChats, createChat, getMessages, renameChat, deleteChat } from './api';
+import { getChats, createChat, getMessages, renameChat, deleteChat, API_URL } from './api';
 import './App.css';
 import { FiMenu } from 'react-icons/fi';
 
@@ -121,7 +121,7 @@ export default function App() {
         ]);
 
         try {
-            const response = await fetch(`http://localhost:8000/chats/${currentChatId}/stream`, {
+            const response = await fetch(`${API_URL}/chats/${currentChatId}/stream`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ chat_id: currentChatId, user_id: userId, prompt: text, language: language })

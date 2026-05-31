@@ -1,3 +1,15 @@
+import sys
+import os
+
+# SQLite override for Render compatibility (deb/ubuntu systems might have old sqlite)
+try:
+    import sqlite3
+    if sqlite3.sqlite_version_info < (3, 35, 0):
+        __import__('pysqlite3')
+        sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+except ImportError:
+    pass
+
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -5,10 +17,10 @@ from typing import Optional, List
 import db_manager
 from sse_starlette.sse import EventSourceResponse
 
-# LangChain imports
+# LangChain & Gemini imports
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.llms import Ollama
+from langchain_google_genai import ChatGoogleGenerativeAI
 import traceback
 
 app = FastAPI()
@@ -30,9 +42,15 @@ def startup_event():
     global db, llm
     try:
         embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-        db_path = "/Users/rahul/Desktop/degree/all projects/geeta/BhagavadGitaAI/embeddings/gita_db"
+        # Use relative path for Render deployment
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        db_path = os.path.join(base_dir, "embeddings", "gita_db")
         db = Chroma(persist_directory=db_path, embedding_function=embeddings)
-        llm = Ollama(model="qwen3:4b")
+        
+        # Load Gemini API Key
+        gemini_api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+        # DUMMY_KEY fallback prevents startup crash in Render checks if env var is missing during builds
+        llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=gemini_api_key or "DUMMY_KEY")
         print("AI Models loaded successfully!")
     except Exception as e:
         print(f"Error loading AI models: {e}")
@@ -175,9 +193,11 @@ Answer:
             for chunk in llm.stream(llm_prompt):
                 if await request.is_disconnected():
                     break
-                full_response += chunk
+                # Extract text content from ChatModel message chunks
+                chunk_text = chunk.content if hasattr(chunk, "content") else str(chunk)
+                full_response += chunk_text
                 # Send text chunk
-                yield {"event": "message", "data": chunk}
+                yield {"event": "message", "data": chunk_text}
             
             # Save assistant message to DB after completion
             db_manager.add_message(chat_id, "assistant", full_response, docs=doc_contents)
